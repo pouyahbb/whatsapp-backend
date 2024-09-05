@@ -31,6 +31,8 @@ let server = app.listen(PORT, () => {
   logger.info(`Server running on PORT ${PORT}...`);
 });
 
+// sghoul look section 3
+
 // handle server errors
 const exitHandler = () => {
   if (server) {
