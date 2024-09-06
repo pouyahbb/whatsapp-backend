@@ -32,8 +32,8 @@ export const register = async (req, res, next) => {
 
     res.json({
       message: "register success.",
-      access_token,
       user: {
+        access_token,
         _id: newUser._id,
         name: newUser.name,
         email: newUser.email,
@@ -70,8 +70,8 @@ export const login = async (req, res, next) => {
 
     res.json({
       message: "register success.",
-      access_token,
       user: {
+        access_token,
         _id: user._id,
         name: user.name,
         email: user.email,
@@ -112,8 +112,8 @@ export const refreshToken = async (req, res, next) => {
       process.env.ACCESS_TOKEN_SECRET
     );
     res.json({
-      access_token,
       user: {
+        access_token,
         _id: user._id,
         name: user.name,
         email: user.email,

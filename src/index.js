@@ -9,50 +9,51 @@ const { DATABASE_URL } = process.env;
 // exit on mongodb error
 mongoose.connection.on("error", (err) => {
   logger.error(`MongoDB connection error: ${err}`);
-  process.exit(1);
+  process.exit(1); // Exit on MongoDB connection error
 });
 
-//  mongodb debug mode
+// MongoDB debug mode
 if (process.env.NODE_ENV !== "production") {
   mongoose.set("debug", true);
 }
 
-// mongodb connection
+// MongoDB connection
 mongoose
-  .connect(DATABASE_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(DATABASE_URL)
   .then(() => {
     logger.info("MongoDB connected successfully");
+  })
+  .catch((err) => {
+    logger.error(`MongoDB connection failed: ${err}`);
+    process.exit(1); // If connection fails, exit process
   });
 
 let server = app.listen(PORT, () => {
   logger.info(`Server running on PORT ${PORT}...`);
 });
 
-// sghoul look section 3
-
-// handle server errors
+// Handle server errors and exit
 const exitHandler = () => {
   if (server) {
-    logger.info("Server closed.");
-    process.exit(1);
+    server.close(() => {
+      logger.info("Server closed.");
+      process.exit(0); // Exit with success code
+    });
   } else {
-    process.exit(1);
+    process.exit(1); // Exit with error code if server is not initialized
   }
 };
-const expectedErrorHandler = (err) => {
-  logger.error(err);
+
+const unexpectedErrorHandler = (error) => {
+  logger.error(error);
   exitHandler();
 };
-process.on("uncaughtException", expectedErrorHandler);
-process.on("unhandledRejection", expectedErrorHandler);
 
-// SIGTERM
+process.on("uncaughtException", unexpectedErrorHandler);
+process.on("unhandledRejection", unexpectedErrorHandler);
+
+// Handle SIGTERM gracefully
 process.on("SIGTERM", () => {
-  if (server) {
-    logger.info("Server closed suddenly.");
-    process.exit(1);
-  }
+  logger.info("SIGTERM received. Shutting down gracefully.");
+  exitHandler();
 });
