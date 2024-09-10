@@ -1,6 +1,8 @@
 import app from "./app.js";
-import logger from "../configs/logger.config.js";
+import logger from "./configs/logger.config.js";
 import mongoose from "mongoose";
+import { Server } from "socket.io";
+import SocketServer from "./SocketServer.js";
 
 // env variable
 const PORT = process.env.PORT || 8000;
@@ -27,9 +29,23 @@ mongoose
     logger.error(`MongoDB connection failed: ${err}`);
     process.exit(1); // If connection fails, exit process
   });
-
-let server = app.listen(PORT, () => {
+let server;
+server = app.listen(PORT, () => {
   logger.info(`Server running on PORT ${PORT}...`);
+});
+//socket io
+const io = new Server(server, {
+  pingTimeout: 60000,
+  cors: {
+    origin: process.env.CLIENT_ENDPOINT,
+  },
+});
+io.on("connection", (socket) => {
+  logger.info("socket io connected successfully.");
+  socket.on("sendMessage", (msg) => {
+    io.emit("reciveMessage", msg);
+  });
+  SocketServer(socket, io);
 });
 
 // Handle server errors and exit
