@@ -42,9 +42,6 @@ const io = new Server(server, {
 });
 io.on("connection", (socket) => {
   logger.info("socket io connected successfully.");
-  socket.on("sendMessage", (msg) => {
-    io.emit("reciveMessage", msg);
-  });
   SocketServer(socket, io);
 });
 
